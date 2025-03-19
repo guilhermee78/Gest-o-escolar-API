@@ -37,3 +37,71 @@ def validar_numeros(dados, campos_numericos):
         if dados.get(campo, 0) < 0:
             return False, f"O campo '{campo}' deve ser um número positivo."
     return True, None
+@app.route('/alunos', methods=['GET'])
+def get_alunos():
+    return jsonify(alunos)
+
+@app.route('/alunos/<int:id_aluno>', methods=['GET'])
+def get_aluno(id_aluno):
+    aluno = next((a for a in alunos if a['id'] == id_aluno), None)
+    if not aluno:
+        return jsonify({'error': 'Aluno não encontrado'}), 404
+    return jsonify(aluno)
+
+@app.route('/alunos', methods=['POST'])
+def post_aluno():
+    dados = request.get_json()
+    
+    valido, erro = validar_campos(dados, ['nome', 'data_nascimento', 'nota_primeiro_semestre', 'nota_segundo_semestre', 'turma_id'])
+    if not valido:
+        return jsonify({'error': erro}), 400
+
+    valido, erro = validar_numeros(dados, ['nota_primeiro_semestre', 'nota_segundo_semestre'])
+    if not valido:
+        return jsonify({'error': erro}), 400
+
+    aluno = {
+        'id': gerar_id(alunos),
+        'nome': dados['nome'],
+        'data_nascimento': dados['data_nascimento'],
+        'nota_primeiro_semestre': dados['nota_primeiro_semestre'],
+        'nota_segundo_semestre': dados['nota_segundo_semestre'],
+        'media_final': (dados['nota_primeiro_semestre'] + dados['nota_segundo_semestre']) / 2,
+        'turma_id': dados['turma_id']
+    }
+    alunos.append(aluno)
+    return jsonify(aluno), 201
+
+@app.route('/alunos/<int:id_aluno>', methods=['PUT'])
+def put_aluno(id_aluno):
+    aluno = next((a for a in alunos if a['id'] == id_aluno), None)
+    if not aluno:
+        return jsonify({'error': 'Aluno não encontrado'}), 404
+    
+    dados = request.get_json()
+
+    valido, erro = validar_campos(dados, ['nome', 'data_nascimento', 'nota_primeiro_semestre', 'nota_segundo_semestre', 'turma_id'])
+    if not valido:
+        return jsonify({'error': erro}), 400
+
+    valido, erro = validar_numeros(dados, ['nota_primeiro_semestre', 'nota_segundo_semestre'])
+    if not valido:
+        return jsonify({'error': erro}), 400
+
+    aluno.update({
+        'nome': dados['nome'],
+        'data_nascimento': dados['data_nascimento'],
+        'nota_primeiro_semestre': dados['nota_primeiro_semestre'],
+        'nota_segundo_semestre': dados['nota_segundo_semestre'],
+        'media_final': (dados['nota_primeiro_semestre'] + dados['nota_segundo_semestre']) / 2,
+        'turma_id': dados['turma_id']
+    })
+    return jsonify(aluno), 200
+
+@app.route('/alunos/<int:id_aluno>', methods=['DELETE'])
+def delete_aluno(id_aluno):
+    aluno = next((a for a in alunos if a['id'] == id_aluno), None)
+    if not aluno:
+        return jsonify({'error': 'Aluno não encontrado'}), 404
+    alunos.remove(aluno)
+    return jsonify({'message': 'Aluno excluído com sucesso'}), 200
