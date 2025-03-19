@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request 
 
 app = Flask(__name__)
 
@@ -170,3 +170,60 @@ def delete_professor(id_professor):
         return jsonify({'error': 'Professor não encontrado'}), 404
     professores.remove(professor)
     return jsonify({'message': 'Professor excluído com sucesso'}), 200
+@app.route('/turmas', methods=['GET'])
+def get_turmas():
+    return jsonify(turmas)
+
+@app.route('/turmas/<int:id_turma>', methods=['GET'])
+def get_turma(id_turma):
+    turma = next((t for t in turmas if t['id'] == id_turma), None)
+    if not turma:
+        return jsonify({'error': 'Turma não encontrada'}), 404
+    return jsonify(turma)
+
+@app.route('/turmas', methods=['POST'])
+def post_turma():
+    dados = request.get_json()
+    
+    valido, erro = validar_campos(dados, ['nome', 'turno', 'professor_id'])
+    if not valido:
+        return jsonify({'error': erro}), 400
+
+    turma = {
+        'id': gerar_id(turmas),
+        'nome': dados['nome'],
+        'turno': dados['turno'],
+        'professor_id': dados['professor_id']
+    }
+    turmas.append(turma)
+    return jsonify(turma), 201
+
+@app.route('/turmas/<int:id_turma>', methods=['PUT'])
+def put_turma(id_turma):
+    turma = next((t for t in turmas if t['id'] == id_turma), None)
+    if not turma:
+        return jsonify({'error': 'Turma não encontrada'}), 404
+
+    dados = request.get_json()
+
+    valido, erro = validar_campos(dados, ['nome', 'turno', 'professor_id'])
+    if not valido:
+        return jsonify({'error': erro}), 400
+
+    turma.update({
+        'nome': dados['nome'],
+        'turno': dados['turno'],
+        'professor_id': dados['professor_id']
+    })
+    return jsonify(turma), 200
+
+@app.route('/turmas/<int:id_turma>', methods=['DELETE'])
+def delete_turma(id_turma):
+    turma = next((t for t in turmas if t['id'] == id_turma), None)
+    if not turma:
+        return jsonify({'error': 'Turma não encontrada'}), 404
+    turmas.remove(turma)
+    return jsonify({'message': 'Turma excluída com sucesso'}), 200
+
+if __name__ == '__main__':
+    app.run(debug=True)
