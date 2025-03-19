@@ -105,3 +105,68 @@ def delete_aluno(id_aluno):
         return jsonify({'error': 'Aluno não encontrado'}), 404
     alunos.remove(aluno)
     return jsonify({'message': 'Aluno excluído com sucesso'}), 200
+
+@app.route('/professores', methods=['GET'])
+def get_professores():
+    return jsonify(professores)
+
+@app.route('/professores/<int:id_professor>', methods=['GET'])
+def get_professor(id_professor):
+    professor = next((p for p in professores if p['id'] == id_professor), None)
+    if not professor:
+        return jsonify({'error': 'Professor não encontrado'}), 404
+    return jsonify(professor)
+
+@app.route('/professores', methods=['POST'])
+def post_professor():
+    dados = request.get_json()
+    
+    valido, erro = validar_campos(dados, ['nome', 'data_nascimento', 'disciplina', 'salario'])
+    if not valido:
+        return jsonify({'error': erro}), 400
+
+    valido, erro = validar_numeros(dados, ['salario'])
+    if not valido:
+        return jsonify({'error': erro}), 400
+
+    professor = {
+        'id': gerar_id(professores),
+        'nome': dados['nome'],
+        'data_nascimento': dados['data_nascimento'],
+        'disciplina': dados['disciplina'],
+        'salario': dados['salario']
+    }
+    professores.append(professor)
+    return jsonify(professor), 201
+
+@app.route('/professores/<int:id_professor>', methods=['PUT'])
+def put_professor(id_professor):
+    professor = next((p for p in professores if p['id'] == id_professor), None)
+    if not professor:
+        return jsonify({'error': 'Professor não encontrado'}), 404
+
+    dados = request.get_json()
+
+    valido, erro = validar_campos(dados, ['nome', 'data_nascimento', 'disciplina', 'salario'])
+    if not valido:
+        return jsonify({'error': erro}), 400
+
+    valido, erro = validar_numeros(dados, ['salario'])
+    if not valido:
+        return jsonify({'error': erro}), 400
+
+    professor.update({
+        'nome': dados['nome'],
+        'data_nascimento': dados['data_nascimento'],
+        'disciplina': dados['disciplina'],
+        'salario': dados['salario']
+    })
+    return jsonify(professor), 200
+
+@app.route('/professores/<int:id_professor>', methods=['DELETE'])
+def delete_professor(id_professor):
+    professor = next((p for p in professores if p['id'] == id_professor), None)
+    if not professor:
+        return jsonify({'error': 'Professor não encontrado'}), 404
+    professores.remove(professor)
+    return jsonify({'message': 'Professor excluído com sucesso'}), 200
