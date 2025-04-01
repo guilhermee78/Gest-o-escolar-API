@@ -1,12 +1,14 @@
+import traceback
 import unittest
 import requests
 
 BASE_URL = "http://127.0.0.1:5000"
 
 class TestAPI(unittest.TestCase):
+
     def test_get_alunos(self):
         response = requests.get(f"{BASE_URL}/alunos")
-        self.assertEqual(response.status_code, 200)
+        self.verificar_status_ok(response)
         self.assertIsInstance(response.json(), list)
 
     def test_post_aluno(self):
@@ -18,8 +20,19 @@ class TestAPI(unittest.TestCase):
             "turma_id": 1
         }
         response = requests.post(f"{BASE_URL}/alunos", json=aluno_data)
-        self.assertEqual(response.status_code, 201)
+        self.verificar_status_criado(response)
         self.assertIn("id", response.json())
+
+    def verificar_status_ok(self, response):
+        if response.status_code != 200:
+            trace = traceback.format_exc()  # Obtém o traceback do erro
+            raise AssertionError(f"Status code esperado 200, mas recebido {response.status_code}. Resposta: {response.text}\nTraceback:\n{trace}")
+
+    def verificar_status_criado(self, response):
+        if response.status_code != 201:
+            trace = traceback.format_exc()  # Obtém o traceback do erro
+            raise AssertionError(f"Status code esperado 201, mas recebido {response.status_code}. Resposta: {response.text}\nTraceback:\n{trace}")
+
 
     def test_get_aluno(self):
         response = requests.get(f"{BASE_URL}/alunos/1")
