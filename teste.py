@@ -1,4 +1,4 @@
-import traceback
+
 import unittest
 import requests
 
@@ -82,73 +82,111 @@ class TestAlunosAPI(unittest.TestCase):
             else:
                 self.fail(f"Erro ao deletar aluno com ID {aluno_id}: {e}")
 
-#     # Teste PROFESSORES
-#     def test_get_professores(self):
-#         response = requests.get(f"{BASE_URL}/professores")
-#         self.assertEqual(response.status_code, 200)
-#         self.assertIsInstance(response.json(), list)
+      
+    def verificar_status_ok(self, response):
+        self.assertEqual(response.status_code, 200)
+    
+    def verificar_status_criado(self, response):
+        self.assertEqual(response.status_code, 201)
+    
+    def test_get_professores(self):
+        try:
+            response = requests.get(f"{BASE_URL}/professores")
+            response.raise_for_status()
+            self.verificar_status_ok(response)
+            self.assertIsInstance(response.json(), list)
+        except requests.exceptions.RequestException as e:
+            self.fail(f"Erro ao obter professores: {e}")
+    
+    def test_post_professor(self):
+        professor_data = {
+            "nome": "Ana Paula",
+            "data_nascimento": "1980-09-10",
+            "disciplina": "Física",
+            "salario": 5200
+        }
+        try:
+            response = requests.post(f"{BASE_URL}/professores", json=professor_data)
+            response.raise_for_status()
+            self.verificar_status_criado(response)
+            self.assertIn("id", response.json())
+        except requests.exceptions.RequestException as e:
+            self.fail(f"Erro ao criar professor: {e}")
+    
+    def test_get_professor(self):
+        professor_id = 1
+        try:
+            response = requests.get(f"{BASE_URL}/professores/{professor_id}")
+            response.raise_for_status()
+            self.verificar_status_ok(response)
+        except requests.exceptions.RequestException as e:
+            if response is not None and response.status_code == 404:
+                self.assertEqual(response.status_code, 404)
+            else:
+                self.fail(f"Erro ao obter professor com ID {professor_id}: {e}")
+    
+    def test_put_professor(self):
+        professor_id = 1
+        professor_update = {
+            "nome": "Ana Paula Lima",
+            "data_nascimento": "1980-09-10",
+            "disciplina": "Física",
+            "salario": 5300
+        }
+        try:
+            response = requests.put(f"{BASE_URL}/professores/{professor_id}", json=professor_update)
+            response.raise_for_status()
+            self.verificar_status_ok(response)
+        except requests.exceptions.RequestException as e:
+            if response is not None and response.status_code == 404:
+                self.assertEqual(response.status_code, 404)
+            else:
+                self.fail(f"Erro ao atualizar professor com ID {professor_id}: {e}")
+    
+    def test_delete_professor(self):
+        professor_id = 1
+        try:
+            response = requests.delete(f"{BASE_URL}/professores/{professor_id}")
+            response.raise_for_status()
+            self.verificar_status_ok(response)
+        except requests.exceptions.RequestException as e:
+            if response is not None and response.status_code == 404:
+                self.assertEqual(response.status_code, 404)
+            else:
+                self.fail(f"Erro ao deletar professor com ID {professor_id}: {e}")
 
-#     def test_post_professor(self):
-#         professor_data = {
-#             "nome": "Ana Paula",
-#             "data_nascimento": "1980-09-10",
-#             "disciplina": "Física",
-#             "salario": 5200
-#         }
-#         response = requests.post(f"{BASE_URL}/professores", json=professor_data)
-#         self.assertEqual(response.status_code, 201)
-#         self.assertIn("id", response.json())
+    # Teste TURMAS
+    def test_get_turmas(self):
+        response = requests.get(f"{BASE_URL}/turmas")
+        self.assertEqual(response.status_code, 200)
+        self.assertIsInstance(response.json(), list)
 
-#     def test_get_professor(self):
-#         response = requests.get(f"{BASE_URL}/professores/1")
-#         self.assertIn(response.status_code, [200, 404])
+    def test_post_turma(self):
+        turma_data = {
+            "nome": "Turma D",
+            "turno": "Tarde",
+            "professor_id": 1
+        }
+        response = requests.post(f"{BASE_URL}/turmas", json=turma_data)
+        self.assertEqual(response.status_code, 201)
+        self.assertIn("id", response.json())
 
-#     def test_put_professor(self):
-#         professor_update = {
-#             "nome": "Ana Paula Lima",
-#             "data_nascimento": "1980-09-10",
-#             "disciplina": "Física",
-#             "salario": 5300
-#         }
-#         response = requests.put(f"{BASE_URL}/professores/1", json=professor_update)
-#         self.assertIn(response.status_code, [200, 404])
+    def test_get_turma(self):
+        response = requests.get(f"{BASE_URL}/turmas/1")
+        self.assertIn(response.status_code, [200, 404])
 
-#     def test_delete_professor(self):
-#         response = requests.delete(f"{BASE_URL}/professores/1")
-#         self.assertIn(response.status_code, [200, 404])
+    def test_put_turma(self):
+        turma_update = {
+            "nome": "Turma D - Avançada",
+            "turno": "Tarde",
+            "professor_id": 1
+        }
+        response = requests.put(f"{BASE_URL}/turmas/1", json=turma_update)
+        self.assertIn(response.status_code, [200, 404])
 
-#     # Teste TURMAS
-#     def test_get_turmas(self):
-#         response = requests.get(f"{BASE_URL}/turmas")
-#         self.assertEqual(response.status_code, 200)
-#         self.assertIsInstance(response.json(), list)
-
-#     def test_post_turma(self):
-#         turma_data = {
-#             "nome": "Turma D",
-#             "turno": "Tarde",
-#             "professor_id": 1
-#         }
-#         response = requests.post(f"{BASE_URL}/turmas", json=turma_data)
-#         self.assertEqual(response.status_code, 201)
-#         self.assertIn("id", response.json())
-
-#     def test_get_turma(self):
-#         response = requests.get(f"{BASE_URL}/turmas/1")
-#         self.assertIn(response.status_code, [200, 404])
-
-#     def test_put_turma(self):
-#         turma_update = {
-#             "nome": "Turma D - Avançada",
-#             "turno": "Tarde",
-#             "professor_id": 1
-#         }
-#         response = requests.put(f"{BASE_URL}/turmas/1", json=turma_update)
-#         self.assertIn(response.status_code, [200, 404])
-
-#     def test_delete_turma(self):
-#         response = requests.delete(f"{BASE_URL}/turmas/1")
-#         self.assertIn(response.status_code, [200, 404])
+    def test_delete_turma(self):
+        response = requests.delete(f"{BASE_URL}/turmas/1")
+        self.assertIn(response.status_code, [200, 404])
 
 if __name__ == "__main__":
     unittest.main()
