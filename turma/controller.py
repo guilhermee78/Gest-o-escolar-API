@@ -1,19 +1,27 @@
 from flask import Blueprint, jsonify, request
-from turma.model import turmas
+from turma.model import (
+    listar_turmas,
+    buscar_turma,
+    criar_turma,
+    atualizar_turma,
+    excluir_turma,
+    TurmaNaoEncontrada
+)
 from Util.helpers import gerar_id, validar_campos
 
 turmas_bp = Blueprint('turmas', __name__)
 
 @turmas_bp.route('/', methods=['GET'])
 def get_turmas():
-    return jsonify(turmas)
+    return jsonify(listar_turmas())
 
 @turmas_bp.route('/<int:id_turma>', methods=['GET'])
 def get_turma(id_turma):
-    turma = next((t for t in turmas if t['id'] == id_turma), None)
-    if not turma:
+    try:
+        turma = buscar_turma(id_turma)
+        return jsonify(turma)
+    except TurmaNaoEncontrada:
         return jsonify({'error': 'Turma não encontrada'}), 404
-    return jsonify(turma)
 
 @turmas_bp.route('/', methods=['POST'])
 def post_turma():
@@ -22,36 +30,27 @@ def post_turma():
     if not valido:
         return jsonify({'error': erro}), 400
 
-    turma = {
-        'id': gerar_id(turmas),
-        'nome': dados['nome'],
-        'turno': dados['turno'],
-        'professor_id': dados['professor_id']
-    }
-    turmas.append(turma)
+    dados['id'] = gerar_id(listar_turmas())
+    turma = criar_turma(dados)
     return jsonify(turma), 201
 
 @turmas_bp.route('/<int:id_turma>', methods=['PUT'])
 def put_turma(id_turma):
-    turma = next((t for t in turmas if t['id'] == id_turma), None)
-    if not turma:
-        return jsonify({'error': 'Turma não encontrada'}), 404
-
     dados = request.get_json()
     valido, erro = validar_campos(dados, ['nome', 'ano'])
     if not valido:
         return jsonify({'error': erro}), 400
 
-    turma.update({
-        'nome': dados['nome'],
-        'ano': dados['ano']
-    })
-    return jsonify(turma)
+    try:
+        turma = atualizar_turma(id_turma, dados)
+        return jsonify(turma)
+    except TurmaNaoEncontrada:
+        return jsonify({'error': 'Turma não encontrada'}), 404
 
 @turmas_bp.route('/<int:id_turma>', methods=['DELETE'])
 def delete_turma(id_turma):
-    turma = next((t for t in turmas if t['id'] == id_turma), None)
-    if not turma:
+    try:
+        excluir_turma(id_turma)
+        return jsonify({'message': 'Turma excluída com sucesso'})
+    except TurmaNaoEncontrada:
         return jsonify({'error': 'Turma não encontrada'}), 404
-    turmas.remove(turma)
-    return jsonify({'message': 'Turma excluída com sucesso'})
