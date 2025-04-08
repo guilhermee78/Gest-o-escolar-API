@@ -37,7 +37,7 @@ def post_turma():
 @turmas_bp.route('/<int:id_turma>', methods=['PUT'])
 def put_turma(id_turma):
     dados = request.get_json()
-    valido, erro = validar_campos(dados, ['nome', 'ano'])
+    valido, erro = validar_campos(dados, ['nome', 'turno', 'professor_id'])
     if not valido:
         return jsonify({'error': erro}), 400
 
@@ -46,6 +46,7 @@ def put_turma(id_turma):
         return jsonify(turma)
     except TurmaNaoEncontrada:
         return jsonify({'error': 'Turma não encontrada'}), 404
+
 
 @turmas_bp.route('/<int:id_turma>', methods=['DELETE'])
 def delete_turma(id_turma):

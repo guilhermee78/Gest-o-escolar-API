@@ -44,10 +44,15 @@ def criar_turma(dados):
 
 def atualizar_turma(id_turma, dados):
     turma = buscar_turma(id_turma)
-    turma.update({
-        'nome': dados['nome'],
-        'ano': dados['ano']
-    })
+    
+    
+    if 'nome' in dados:
+        turma['nome'] = dados['nome']
+    if 'turno' in dados:
+        turma['turno'] = dados['turno']
+    if 'professor_id' in dados:
+        turma['professor_id'] = dados['professor_id']
+
     return turma
 
 def excluir_turma(id_turma):
