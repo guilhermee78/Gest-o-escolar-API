@@ -11,5 +11,9 @@ app.register_blueprint(alunos_bp, url_prefix='/alunos')
 app.register_blueprint(professores_bp, url_prefix='/professores')
 app.register_blueprint(turmas_bp, url_prefix='/turmas')
 
+@app.route('/')
+def health_check():
+    return "API is running", 200
+
 if __name__ == '__main__':
     app.run(debug=True)
