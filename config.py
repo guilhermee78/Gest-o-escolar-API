@@ -1,7 +1,7 @@
 import os
 
 class Config:
-    DEBUG = True
-    HOST = '127.0.0.1'
-    PORT = 5000
-    SECRET_KEY = os.getenv('SECRET_KEY', 'api-escolar')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///escola.db'
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
+
+

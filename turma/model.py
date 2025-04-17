@@ -1,60 +1,40 @@
-turmas = [
-    {
-        "id": 1,
-        "nome": "1º Ano A",
-        "turno": "Manhã",
-        "professor_id": 1
-    },
-    {
-        "id": 2,
-        "nome": "2º Ano B",
-        "turno": "Tarde",
-        "professor_id": 2
-    },
-    {
-        "id": 3,
-        "nome": "3º Ano C",
-        "turno": "Noite",
-        "professor_id": 3
-    }
-]
+from sql import db
 
 
-class TurmaNaoEncontrada(Exception):
-    pass
+class TurmaModel(db.Model):
+    __tablename__ = 'turmas'
 
-def listar_turmas():
-    return turmas
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(80), nullable=False)
+    turno = db.Column(db.String(20))
+    professor_id = db.Column(db.Integer, db.ForeignKey('professores.id'))
+    # professor = db.relationship('ProfessorModel') # Para acessar os dados do professor relacionado (opcional)
 
-def buscar_turma(id_turma):
-    turma = next((t for t in turmas if t['id'] == id_turma), None)
-    if not turma:
-        raise TurmaNaoEncontrada
-    return turma
+    def __init__(self, nome, turno, professor_id):
+        self.nome = nome
+        self.turno = turno
+        self.professor_id = professor_id
 
-def criar_turma(dados):
-    turma = {
-        'id': dados['id'],
-        'nome': dados['nome'],
-        'turno': dados['turno'],
-        'professor_id': dados['professor_id']
-    }
-    turmas.append(turma)
-    return turma
+    def json(self):
+        return {
+            'id': self.id,
+            'nome': self.nome,
+            'turno': self.turno,
+            'professor_id': self.professor_id
+        }
 
-def atualizar_turma(id_turma, dados):
-    turma = buscar_turma(id_turma)
-    
-    
-    if 'nome' in dados:
-        turma['nome'] = dados['nome']
-    if 'turno' in dados:
-        turma['turno'] = dados['turno']
-    if 'professor_id' in dados:
-        turma['professor_id'] = dados['professor_id']
+    @classmethod
+    def find_by_id(cls, id):
+        return cls.query.get_or_404(id)
 
-    return turma
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
 
-def excluir_turma(id_turma):
-    turma = buscar_turma(id_turma)
-    turmas.remove(turma)
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()

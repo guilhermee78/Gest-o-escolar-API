@@ -1,70 +1,49 @@
-alunos = [
-    {
-        "id": 1,
-        "nome": "Ana Clara",
-        "data_nascimento": "12/03/2008",
-        "nota_primeiro_semestre": 8.5,
-        "nota_segundo_semestre": 7.0,
-        "media_final": 7.75,
-        "turma_id": 1
-    },
-    {
-        "id": 2,
-        "nome": "Lucas Oliveira",
-        "data_nascimento": "23/07/2007",
-        "nota_primeiro_semestre": 6.0,
-        "nota_segundo_semestre": 5.5,
-        "media_final": 5.75,
-        "turma_id": 2
-    },
-    {
-        "id": 3,
-        "nome": "Mariana Costa",
-        "data_nascimento": "30/01/2006",
-        "nota_primeiro_semestre": 9.0,
-        "nota_segundo_semestre": 8.0,
-        "media_final": 8.5,
-        "turma_id": 3
-    }
-]
+from sql import db
 
-class AlunoNaoEncontrado(Exception):
-    pass
 
-def listar_alunos():
-    return alunos
+class AlunoModel(db.Model):
+    __tablename__ = 'alunos'
 
-def buscar_aluno(id_aluno):
-    aluno = next((a for a in alunos if a['id'] == id_aluno), None)
-    if not aluno:
-        raise AlunoNaoEncontrado
-    return aluno
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(80), nullable=False)
+    data_nascimento = db.Column(db.String(10))  # Formato DD/MM/AAAA
+    nota_primeiro_semestre = db.Column(db.Float)
+    nota_segundo_semestre = db.Column(db.Float)
+    media_final = db.Column(db.Float)
+    turma_id = db.Column(db.Integer, db.ForeignKey('turmas.id')) # Chave estrangeira para Turma
+    # turma = db.relationship('TurmaModel') # Para acessar os dados da turma relacionada (opcional)
 
-def criar_aluno(dados):
-    aluno = {
-        'id': dados['id'],
-        'nome': dados['nome'],
-        'data_nascimento': dados['data_nascimento'],
-        'nota_primeiro_semestre': dados['nota_primeiro_semestre'],
-        'nota_segundo_semestre': dados['nota_segundo_semestre'],
-        'media_final': (dados['nota_primeiro_semestre'] + dados['nota_segundo_semestre']) / 2,
-        'turma_id': dados['turma_id']
-    }
-    alunos.append(aluno)
-    return aluno
+    def __init__(self, nome, data_nascimento, nota_primeiro_semestre, nota_segundo_semestre, turma_id):
+        self.nome = nome
+        self.data_nascimento = data_nascimento
+        self.nota_primeiro_semestre = nota_primeiro_semestre
+        self.nota_segundo_semestre = nota_segundo_semestre
+        self.media_final = (nota_primeiro_semestre + nota_segundo_semestre) / 2
+        self.turma_id = turma_id
 
-def atualizar_aluno(id_aluno, dados):
-    aluno = buscar_aluno(id_aluno)
-    aluno.update({
-        'nome': dados['nome'],
-        'data_nascimento': dados['data_nascimento'],
-        'nota_primeiro_semestre': dados['nota_primeiro_semestre'],
-        'nota_segundo_semestre': dados['nota_segundo_semestre'],
-        'media_final': (dados['nota_primeiro_semestre'] + dados['nota_segundo_semestre']) / 2,
-        'turma_id': dados['turma_id']
-    })
-    return aluno
+    def json(self):
+        return {
+            'id': self.id,
+            'nome': self.nome,
+            'data_nascimento': self.data_nascimento,
+            'nota_primeiro_semestre': self.nota_primeiro_semestre,
+            'nota_segundo_semestre': self.nota_segundo_semestre,
+            'media_final': self.media_final,
+            'turma_id': self.turma_id
+        }
 
-def excluir_aluno(id_aluno):
-    aluno = buscar_aluno(id_aluno)
-    alunos.remove(aluno)
+    @classmethod
+    def find_by_id(cls, id):
+        return cls.query.get_or_404(id)
+
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()

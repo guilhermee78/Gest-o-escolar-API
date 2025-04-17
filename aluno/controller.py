@@ -1,27 +1,18 @@
 from flask import Blueprint, jsonify, request
-from aluno.model import (
-    listar_alunos,
-    buscar_aluno,
-    criar_aluno,
-    atualizar_aluno,
-    excluir_aluno,
-    AlunoNaoEncontrado
-)
-from Util.helpers import gerar_id, validar_campos, validar_numeros
+from aluno.model import AlunoModel  # Importe o AlunoModel do SQLAlchemy
+from Util.helpers import validar_campos, validar_numeros
 
 alunos_bp = Blueprint('alunos', __name__)
 
 @alunos_bp.route('/', methods=['GET'])
 def get_alunos():
-    return jsonify(listar_alunos())
+    alunos = AlunoModel.find_all()
+    return jsonify([aluno.json() for aluno in alunos])
 
 @alunos_bp.route('/<int:id_aluno>', methods=['GET'])
 def get_aluno(id_aluno):
-    try:
-        aluno = buscar_aluno(id_aluno)
-        return jsonify(aluno)
-    except AlunoNaoEncontrado:
-        return jsonify({'error': 'Aluno não encontrado'}), 404
+    aluno = AlunoModel.find_by_id(id_aluno)
+    return jsonify(aluno.json())
 
 @alunos_bp.route('/', methods=['POST'])
 def post_aluno():
@@ -33,9 +24,15 @@ def post_aluno():
     if not valido:
         return jsonify({'error': erro}), 400
 
-    dados['id'] = gerar_id(listar_alunos())
-    aluno = criar_aluno(dados)
-    return jsonify(aluno), 201
+    aluno = AlunoModel(
+        nome=dados['nome'],
+        data_nascimento=dados['data_nascimento'],
+        nota_primeiro_semestre=dados['nota_primeiro_semestre'],
+        nota_segundo_semestre=dados['nota_segundo_semestre'],
+        turma_id=dados['turma_id']
+    )
+    aluno.save_to_db()
+    return jsonify(aluno.json()), 201
 
 @alunos_bp.route('/<int:id_aluno>', methods=['PUT'])
 def put_aluno(id_aluno):
@@ -47,16 +44,17 @@ def put_aluno(id_aluno):
     if not valido:
         return jsonify({'error': erro}), 400
 
-    try:
-        aluno = atualizar_aluno(id_aluno, dados)
-        return jsonify(aluno)
-    except AlunoNaoEncontrado:
-        return jsonify({'error': 'Aluno não encontrado'}), 404
+    aluno = AlunoModel.find_by_id(id_aluno)
+    aluno.nome = dados['nome']
+    aluno.data_nascimento = dados['data_nascimento']
+    aluno.nota_primeiro_semestre = dados['nota_primeiro_semestre']
+    aluno.nota_segundo_semestre = dados['nota_segundo_semestre']
+    aluno.turma_id = dados['turma_id']
+    aluno.save_to_db()
+    return jsonify(aluno.json())
 
 @alunos_bp.route('/<int:id_aluno>', methods=['DELETE'])
 def delete_aluno(id_aluno):
-    try:
-        excluir_aluno(id_aluno)
-        return jsonify({'message': 'Aluno excluído com sucesso'})
-    except AlunoNaoEncontrado:
-        return jsonify({'error': 'Aluno não encontrado'}), 404
+    aluno = AlunoModel.find_by_id(id_aluno)
+    aluno.delete_from_db()
+    return jsonify({'message': 'Aluno excluído com sucesso'})

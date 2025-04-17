@@ -1,50 +1,31 @@
-professores = [
-    {
-        "id": 1,
-        "nome": "Carlos Silva",
-        "disciplina": "Matemática"
-    },
-    {
-        "id": 2,
-        "nome": "Fernanda Lima",
-        "disciplina": "Português"
-    },
-    {
-        "id": 3,
-        "nome": "João Pedro",
-        "disciplina": "História"
-    }
-]
+from sql import db
 
-class ProfessorNaoEncontrado(Exception):
-    pass
+class ProfessorModel(db.Model):
+    __tablename__ = 'professores'
 
-def listar_professores():
-    return professores
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(80), nullable=False)
+    disciplina = db.Column(db.String(80))
 
-def buscar_professor(id_professor):
-    professor = next((p for p in professores if p['id'] == id_professor), None)
-    if not professor:
-        raise ProfessorNaoEncontrado
-    return professor
+    def __init__(self, nome, disciplina):
+        self.nome = nome
+        self.disciplina = disciplina
 
-def criar_professor(dados):
-    professor = {
-        'id': dados['id'],
-        'nome': dados['nome'],
-        'disciplina': dados['disciplina']
-    }
-    professores.append(professor)
-    return professor
+    def json(self):
+        return {'id': self.id, 'nome': self.nome, 'disciplina': self.disciplina}
 
-def atualizar_professor(id_professor, dados):
-    professor = buscar_professor(id_professor)
-    professor.update({
-        'nome': dados['nome'],
-        'disciplina': dados['disciplina']
-    })
-    return professor
+    @classmethod
+    def find_by_id(cls, id):
+        return cls.query.get_or_404(id)
 
-def excluir_professor(id_professor):
-    professor = buscar_professor(id_professor)
-    professores.remove(professor)
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()
+
+    def save_to_db(self):
+        db.session.add(self)
+        db.session.commit()
+
+    def delete_from_db(self):
+        db.session.delete(self)
+        db.session.commit()
