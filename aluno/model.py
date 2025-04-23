@@ -1,5 +1,4 @@
 from sql import db
-from turma.model import TurmaModel
 from datetime import datetime
 
 class AlunoModel(db.Model):
