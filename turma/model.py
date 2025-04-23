@@ -8,22 +8,22 @@ class TurmaModel(db.Model):
     nome = db.Column(db.String(80), nullable=False)
     turno = db.Column(db.String(20))
     professor_id = db.Column(db.Integer, db.ForeignKey('professores.id'))
-    # professor = db.relationship('ProfessorModel') # Para acessar os dados do professor relacionado (opcional)
-
-
     alunos = db.relationship('AlunoModel', back_populates='turma', cascade="all, delete-orphan")
-    
+    professor = db.relationship('ProfessorModel', backref=db.backref('turmas', lazy=True)) # Adicionado relacionamento com Professor
+
     def __init__(self, nome, turno, professor_id):
         self.nome = nome
         self.turno = turno
         self.professor_id = professor_id
 
-    def json(self):
+    def to_dict(self):
         return {
             'id': self.id,
             'nome': self.nome,
             'turno': self.turno,
-            'professor_id': self.professor_id
+            'professor_id': self.professor_id,
+            'alunos': [aluno.to_dict() for aluno in self.alunos], # Inclui a lista de alunos
+            'professor': self.professor.to_dict() if self.professor else None # Inclui informações do professor
         }
 
     @classmethod
