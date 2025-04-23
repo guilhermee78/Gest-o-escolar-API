@@ -1,5 +1,5 @@
 from sql import db
-
+from professor.model import ProfessorModel
 
 class TurmaModel(db.Model):
     __tablename__ = 'turmas'
@@ -10,6 +10,9 @@ class TurmaModel(db.Model):
     professor_id = db.Column(db.Integer, db.ForeignKey('professores.id'))
     # professor = db.relationship('ProfessorModel') # Para acessar os dados do professor relacionado (opcional)
 
+
+    alunos = db.relationship('AlunoModel', back_populates='turma', cascade="all, delete-orphan")
+    
     def __init__(self, nome, turno, professor_id):
         self.nome = nome
         self.turno = turno

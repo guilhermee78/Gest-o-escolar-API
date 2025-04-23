@@ -11,7 +11,6 @@ app.config.from_object(Config)
 db.init_app(app)  # Inicialize a extensão db com a aplicação Flask
 
 
-
 # Registrar os Blueprints
 app.register_blueprint(alunos_bp, url_prefix='/alunos')
 app.register_blueprint(professores_bp, url_prefix='/professores')
