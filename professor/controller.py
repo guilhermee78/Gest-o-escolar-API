@@ -36,13 +36,17 @@ def put_professor(id_professor):
         return jsonify({'error': erro}), 400
 
     professor = ProfessorModel.find_by_id(id_professor)
-    professor.nome = dados['nome']
-    professor.disciplina = dados['disciplina']
-    professor.save_to_db()
-    return jsonify(professor.json())
+    if professor:  # Adicionado verificação se o professor existe
+        professor.nome = dados['nome']
+        professor.disciplina = dados['disciplina']
+        professor.save_to_db()
+        return jsonify(professor.json())
+    return jsonify({'error': 'Professor não encontrado'}), 404
 
 @professores_bp.route('/<int:id_professor>', methods=['DELETE'])
 def delete_professor(id_professor):
     professor = ProfessorModel.find_by_id(id_professor)
-    professor.delete_from_db()
-    return jsonify({'message': 'Professor excluído com sucesso'})
+    if professor:  # Adicionado verificação se o professor existe
+        professor.delete_from_db()
+        return jsonify({'message': 'Professor excluído com sucesso'})
+    return jsonify({'error': 'Professor não encontrado'}), 404

@@ -11,7 +11,7 @@ class ProfessorModel(db.Model):
         self.nome = nome
         self.disciplina = disciplina
 
-    def json(self):
+    def to_dict(self):
         return {'id': self.id, 'nome': self.nome, 'disciplina': self.disciplina}
 
     @classmethod
