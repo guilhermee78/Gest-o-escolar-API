@@ -1,8 +1,8 @@
 import unittest
 import requests
-from config import Config
 
-BASE_URL = f"http://127.0.0.1:{Config.PORT}"
+
+BASE_URL = "http://127.0.0.1:5001"
 
 class TestBaseAPI(unittest.TestCase):
     
