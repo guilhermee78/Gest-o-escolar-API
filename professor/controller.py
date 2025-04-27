@@ -4,17 +4,17 @@ from Util.helpers import validar_campos
 
 professores_bp = Blueprint('professores', __name__)
 
-@professores_bp.route('/', methods=['GET'])
+@professores_bp.route('/professores', methods=['GET'])
 def get_professores():
     professores = ProfessorModel.find_all()
     return jsonify([professor.to_dict() for professor in professores])
 
-@professores_bp.route('/<int:id_professor>', methods=['GET'])
+@professores_bp.route('/professores/<int:id_professor>', methods=['GET'])
 def get_professor(id_professor):
     professor = ProfessorModel.find_by_id(id_professor)
     return jsonify(professor.to_dict())
 
-@professores_bp.route('/', methods=['POST'])
+@professores_bp.route('/professores', methods=['POST'])
 def post_professor():
     dados = request.get_json()
     valido, erro = validar_campos(dados, ['nome', 'disciplina'])
@@ -28,7 +28,7 @@ def post_professor():
     professor.save_to_db()
     return jsonify(professor.to_dict()), 201
 
-@professores_bp.route('/<int:id_professor>', methods=['PUT'])
+@professores_bp.route('/professores/<int:id_professor>', methods=['PUT'])
 def put_professor(id_professor):
     dados = request.get_json()
     valido, erro = validar_campos(dados, ['nome', 'disciplina'])
@@ -43,7 +43,7 @@ def put_professor(id_professor):
         return jsonify(professor.to_dict())
     return jsonify({'error': 'Professor não encontrado'}), 404
 
-@professores_bp.route('/<int:id_professor>', methods=['DELETE'])
+@professores_bp.route('/professores/<int:id_professor>', methods=['DELETE'])
 def delete_professor(id_professor):
     professor = ProfessorModel.find_by_id(id_professor)
     if professor:  # Adicionado verificação se o professor existe
