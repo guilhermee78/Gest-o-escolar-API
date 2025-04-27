@@ -1,9 +1,8 @@
 import time
 import requests
 import pytest
-from config import Config
 
-BASE_URL = f"http://127.0.0.1:{Config.PORT}"
+BASE_URL = "http://127.0.0.1:5001"
 
 def espera_api_estar_ativa(url=BASE_URL, timeout=30, poll_interval=5):
     print("ENTRANDO NA FUNÇÃO espera_api_estar_ativa")
@@ -186,7 +185,8 @@ def test_put_professor():
     professor_id = 1
     professor_update = {
         "nome": "Ana Paula Lima",
-        "disciplina": "Física"
+        "disciplina": "Física",
+
     }
     print("\nEXECUTANDO TESTE: test_put_professor")
     try:
