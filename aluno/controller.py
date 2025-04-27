@@ -1,20 +1,20 @@
 from flask import Blueprint, jsonify, request
-from aluno.model import AlunoModel  
+from aluno.model import AlunoModel
 from Util.helpers import validar_campos, validar_numeros
 
 alunos_bp = Blueprint('alunos', __name__)
 
-@alunos_bp.route('/', methods=['GET'])
+@alunos_bp.route('/alunos', methods=['GET'])
 def get_alunos():
     alunos = AlunoModel.find_all()
     return jsonify([aluno.to_dict() for aluno in alunos])  # Usando to_dict
 
-@alunos_bp.route('/<int:id_aluno>', methods=['GET'])
+@alunos_bp.route('/alunos/<int:id_aluno>', methods=['GET'])
 def get_aluno(id_aluno):
     aluno = AlunoModel.find_by_id(id_aluno)
     return jsonify(aluno.to_dict())  # Usando to_dict
 
-@alunos_bp.route('/', methods=['POST'])
+@alunos_bp.route('/alunos', methods=['POST'])
 def post_aluno():
     dados = request.get_json()
     valido, erro = validar_campos(dados, ['nome', 'data_nascimento', 'nota_primeiro_semestre', 'nota_segundo_semestre', 'turma_id'])
@@ -34,7 +34,7 @@ def post_aluno():
     aluno.save_to_db()
     return jsonify(aluno.to_dict()), 201  # Usando to_dict
 
-@alunos_bp.route('/<int:id_aluno>', methods=['PUT'])
+@alunos_bp.route('/alunos/<int:id_aluno>', methods=['PUT'])
 def put_aluno(id_aluno):
     dados = request.get_json()
     valido, erro = validar_campos(dados, ['nome', 'data_nascimento', 'nota_primeiro_semestre', 'nota_segundo_semestre', 'turma_id'])
@@ -55,7 +55,7 @@ def put_aluno(id_aluno):
         return jsonify(aluno.to_dict())  # Usando to_dict
     return jsonify({'error': 'Aluno não encontrado'}), 404
 
-@alunos_bp.route('/<int:id_aluno>', methods=['DELETE'])
+@alunos_bp.route('/alunos/<int:id_aluno>', methods=['DELETE'])
 def delete_aluno(id_aluno):
     aluno = AlunoModel.find_by_id(id_aluno)
     if aluno:
