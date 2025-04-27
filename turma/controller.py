@@ -1,20 +1,20 @@
 from flask import Blueprint, jsonify, request
-from turma.model import TurmaModel  
+from turma.model import TurmaModel
 from Util.helpers import validar_campos
 
 turmas_bp = Blueprint('turmas', __name__)
 
-@turmas_bp.route('/', methods=['GET'])
+@turmas_bp.route('/turmas', methods=['GET'])
 def get_turmas():
     turmas = TurmaModel.find_all()
     return jsonify([turma.to_dict() for turma in turmas])
 
-@turmas_bp.route('/<int:id_turma>', methods=['GET'])
+@turmas_bp.route('/turmas/<int:id_turma>', methods=['GET'])
 def get_turma(id_turma):
     turma = TurmaModel.find_by_id(id_turma)
     return jsonify(turma.to_dict())
 
-@turmas_bp.route('/', methods=['POST'])
+@turmas_bp.route('/turmas', methods=['POST'])
 def post_turma():
     dados = request.get_json()
     valido, erro = validar_campos(dados, ['nome', 'turno', 'professor_id'])
@@ -29,7 +29,7 @@ def post_turma():
     turma.save_to_db()
     return jsonify(turma.to_dict()), 201
 
-@turmas_bp.route('/<int:id_turma>', methods=['PUT'])
+@turmas_bp.route('/turmas/<int:id_turma>', methods=['PUT'])
 def put_turma(id_turma):
     dados = request.get_json()
     valido, erro = validar_campos(dados, ['nome', 'turno', 'professor_id'])
@@ -46,7 +46,7 @@ def put_turma(id_turma):
     turma.save_to_db()
     return jsonify(turma.to_dict())
 
-@turmas_bp.route('/<int:id_turma>', methods=['DELETE'])
+@turmas_bp.route('/turmas/<int:id_turma>', methods=['DELETE'])
 def delete_turma(id_turma):
     turma = TurmaModel.find_by_id(id_turma)
     turma.delete_from_db()
