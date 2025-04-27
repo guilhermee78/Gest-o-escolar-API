@@ -12,9 +12,9 @@ db.init_app(app)  # Inicialize a extensão db com a aplicação Flask
 
 
 # Registrar os Blueprints
-app.register_blueprint(alunos_bp, url_prefix='/alunos')
-app.register_blueprint(professores_bp, url_prefix='/professores')
-app.register_blueprint(turmas_bp, url_prefix='/turmas')
+app.register_blueprint(alunos_bp, url_prefix='/api')
+app.register_blueprint(professores_bp, url_prefix='/api')
+app.register_blueprint(turmas_bp, url_prefix='/api')
 
 @app.route('/')
 def health_check():
