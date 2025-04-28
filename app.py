@@ -4,7 +4,7 @@ from sql import db
 from aluno.controller import alunos_bp
 from professor.controller import professores_bp
 from turma.controller import turmas_bp
-from swagger.__init__ import api
+from swagger import api  # Importação correta
 
 app = Flask(__name__)
 app.config.from_object(Config)
