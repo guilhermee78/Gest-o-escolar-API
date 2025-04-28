@@ -1,6 +1,7 @@
 from flask_restx import Namespace, Resource, fields
-from aluno.model import AlunoModel  # Corrigido o import
-from Util.helpers import validar_campos, validar_numeros  # Para validar os dados
+from aluno.model import AlunoModel
+from Util.helpers import validar_campos, validar_numeros
+from datetime import datetime
 
 alunos_ns = Namespace("alunos", description="Operações relacionadas aos alunos")
 
@@ -18,6 +19,8 @@ aluno_output_model = alunos_ns.model("AlunoOutput", {
     "data_nascimento": fields.String(description="Data de nascimento (YYYY-MM-DD)"),
     "nota_primeiro_semestre": fields.Float(description="Nota do primeiro semestre"),
     "nota_segundo_semestre": fields.Float(description="Nota do segundo semestre"),
+    "media_final": fields.Float(description="Média final do aluno"),
+    "idade": fields.Integer(description="Idade do aluno"),
     "turma_id": fields.Integer(description="ID da turma associada"),
 })
 
@@ -27,7 +30,7 @@ class AlunosResource(Resource):
     def get(self):
         """Lista todos os alunos"""
         alunos = AlunoModel.find_all()
-        return [aluno.to_dict() for aluno in alunos]
+        return [aluno.to_dict_with_age() for aluno in alunos]
 
     @alunos_ns.expect(aluno_model)
     @alunos_ns.marshal_with(aluno_output_model, code=201)
@@ -51,7 +54,7 @@ class AlunosResource(Resource):
             turma_id=dados['turma_id']
         )
         aluno.save_to_db()
-        return aluno.to_dict(), 201
+        return aluno.to_dict_with_age(), 201
 
 @alunos_ns.route("/<int:id_aluno>")
 class AlunoIdResource(Resource):
@@ -60,7 +63,7 @@ class AlunoIdResource(Resource):
         """Obtém um aluno pelo ID"""
         aluno = AlunoModel.find_by_id(id_aluno)
         if aluno:
-            return aluno.to_dict()
+            return aluno.to_dict_with_age()
         alunos_ns.abort(404, "Aluno não encontrado")
 
     @alunos_ns.expect(aluno_model)
@@ -85,7 +88,7 @@ class AlunoIdResource(Resource):
             aluno.nota_segundo_semestre = dados['nota_segundo_semestre']
             aluno.turma_id = dados['turma_id']
             aluno.save_to_db()
-            return aluno.to_dict(), 200
+            return aluno.to_dict_with_age(), 200
 
         alunos_ns.abort(404, "Aluno não encontrado")
 
