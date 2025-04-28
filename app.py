@@ -4,7 +4,7 @@ from sql import db
 from aluno.controller import alunos_bp
 from professor.controller import professores_bp
 from turma.controller import turmas_bp
-from swagger import api  # Importação correta
+from swagger.swagger_config import configure_swagger
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -18,7 +18,7 @@ app.register_blueprint(alunos_bp, url_prefix='/api')
 app.register_blueprint(professores_bp, url_prefix='/api')
 app.register_blueprint(turmas_bp, url_prefix='/api')
 
-api.init_app(app) # Inicialize o flask_restx com a instância do Flask
+configure_swagger(app) # Inicialize o flask_restx com a instância do Flask
 
 @app.route('/')
 def health_check():
